@@ -1,0 +1,44 @@
+version: "3.7"
+services:
+  db:
+    image: mysql:8.0.19
+    ports:
+      - 3308:3306
+    container_name: universidad-db-invoice
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+    networks:
+      - codeigniter
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.0.2
+    ports:
+      - 8082:80
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - codeigniter
+  app:
+    image: wabox/codeigniter4:1.2
+    ports:
+      - 8002:80
+    container_name:  universidad-invoice
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    links:
+      - db
+    networks:
+      - codeigniter
+
+networks:
+  codeigniter:
+    driver: bridge
+volumes:
+  data:
